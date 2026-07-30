@@ -1,0 +1,36 @@
+{
+  "description": "Factorial ablation variant grid. Axes: anchor_strategy x representative_strategy x loss_strategy. Shared: frozen backbone, manifests, prototype bank, hard negatives, split, split_seed=42, k=ceil(rho*n), assignment=embedding_cosine, eval code, full-index scores. Only the named axis values vary.",
+  "shared": {
+    "backbone": "colqwen2.5-v0.1",
+    "bank": "outputs/bank_seed42.pt",
+    "cache": "data/cache_colqwen",
+    "manifest_protocol": "table9_heldout_30pct_seed0_docdisjoint",
+    "split_seed": 42,
+    "assignment_rule": "embedding_cosine_anchor_ownership",
+    "mlp": "WeightMLP 15->32->16->1 GELU (1057 params)",
+    "epochs": 5,
+    "optimizer": "AdamW lr=3e-4 wd=1e-4, grad-accum 4, clip 1.0",
+    "checkpoint_selection": "val nDCG@5 (tie: val flip)"
+  },
+  "minimal_matrix": [
+    {"id": "v1", "anchor": "random",   "representative": "response_centroid", "loss": "none"},
+    {"id": "v2", "anchor": "kcenter",  "representative": "response_centroid", "loss": "none"},
+    {"id": "v3", "anchor": "coverage", "representative": "response_centroid", "loss": "none"},
+    {"id": "v4", "anchor": "random",   "representative": "learned", "loss": "margin"},
+    {"id": "v5", "anchor": "kcenter",  "representative": "learned", "loss": "margin"},
+    {"id": "v6", "anchor": "coverage", "representative": "learned", "loss": "margin"}
+  ],
+  "references": [
+    {"id": "r7", "reference": "merging", "note": "geometric token-merging (ToMe / Light-ColPali)"},
+    {"id": "r8", "anchor": "coverage", "representative": "learned", "loss": "full", "note": "full MarginMerge objective"},
+    {"id": "r9", "reference": "full", "note": "full uncompressed index"}
+  ],
+  "full_grid_for_analysis": {
+    "note": "Superset run so main-effects / interaction / loss-ladder (Q4) are estimable. Non-learned = eval only; learned = one trained MLP per (anchor,loss,seed).",
+    "anchor_strategy": ["random", "kcenter", "coverage"],
+    "representative_strategy": ["anchor", "uniform_centroid", "response_centroid", "learned"],
+    "loss_strategy_for_learned": ["score_reconstruction", "margin", "full"]
+  },
+  "phase_A": {"datasets": ["arxivqa", "flickr", "tabfquad"], "rho": [0.05], "seeds": [42]},
+  "phase_B": {"datasets": ["arxivqa", "docvqa", "infovqa", "tatdqa", "tabfquad", "flickr"], "rho": [0.05, 0.10], "seeds": [42, 43, 44]}
+}

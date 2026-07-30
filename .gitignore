@@ -1,0 +1,12 @@
+# large binaries / regenerable artifacts — never commit
+*.pt
+*.pth
+*.safetensors
+data/
+outputs/
+**/__pycache__/
+*.pyc
+.DS_Store
+.venv/
+venv*/
+*.egg-info/

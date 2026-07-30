@@ -1,0 +1,10 @@
+# Separate env ONLY for encoding/verifying ColPali-v1.3 (PaliGemma) and SAP attention extraction.
+# transformers>=4.49 silently random-initialises the PaliGemma LM -> garbage embeddings.
+# colpali-engine 0.3.5 self-resolves to the pre-refactor transformers 4.46.3, which loads it correctly.
+torch>=2.2
+transformers==4.46.3
+colpali-engine==0.3.5
+peft==0.11.1
+datasets>=2.19
+pillow
+accelerate

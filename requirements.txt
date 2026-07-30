@@ -1,0 +1,14 @@
+# Core (compression, training, evaluation, analysis) — reads cached embeddings, backbone-agnostic
+torch>=2.2
+numpy>=1.26
+scikit-learn>=1.3
+# Encoding ColQwen2.5 from scratch additionally needs:
+#   transformers==4.47.1   (loads vidore/colqwen2.5-v0.1 without re-init; NOT >=4.49)
+#   colpali-engine>=0.3.1
+#   datasets>=2.19
+#   pillow, accelerate
+transformers==4.47.1
+colpali-engine>=0.3.1
+datasets>=2.19
+pillow
+accelerate

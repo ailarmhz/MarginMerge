@@ -1,0 +1,29 @@
+\begin{tabular}{lllccccccc}
+\toprule
+Anchor & Representative & Loss & ArxivQA & DocVQA & InfoVQA & TAT-DQA & TabFQuad & Flickr & Avg. \\
+\midrule
+-- & Geometric merging & -- & 0.920 & 0.667 & 0.909 & 0.888 & 0.927 & 0.874 & 0.864 \\
+ & Full index & -- & 0.941 & 0.705 & 0.928 & 0.900 & 0.943 & 0.932 & 0.892 \\
+\midrule
+Random & Retained anchor & -- & 0.885 & 0.651 & 0.886 & 0.871 & 0.908 & 0.706 & 0.818 \\
+ & Uniform centroid & -- & 0.920 & 0.677 & 0.913 & 0.892 & 0.938 & 0.858 & 0.866 \\
+ & Response centroid & -- & 0.897 & 0.670 & 0.900 & 0.885 & 0.916 & 0.761 & 0.838 \\
+ & Learned (score-recon) & score-recon & 0.932 & 0.698 & 0.916 & 0.899 & 0.940 & 0.905 & 0.882 \\
+ & Learned (margin) & margin & 0.930 & 0.696 & 0.925 & 0.897 & 0.940 & 0.891 & 0.880 \\
+ & Learned (full) & full & 0.931 & 0.692 & 0.927 & 0.898 & 0.940 & 0.899 & 0.881 \\
+\midrule
+$k$-center & Retained anchor & -- & 0.903 & 0.658 & 0.858 & 0.882 & 0.909 & 0.752 & 0.827 \\
+ & Uniform centroid & -- & 0.928 & 0.674 & 0.912 & 0.895 & 0.932 & 0.908 & 0.875 \\
+ & Response centroid & -- & 0.930 & 0.689 & 0.892 & 0.897 & 0.920 & 0.834 & 0.860 \\
+ & Learned (score-recon) & score-recon & 0.932 & 0.700 & 0.916 & 0.896 & 0.939 & 0.916 & 0.883 \\
+ & Learned (margin) & margin & 0.931 & 0.702 & 0.913 & 0.895 & 0.934 & 0.913 & 0.881 \\
+ & Learned (full) & full & 0.930 & 0.703 & 0.913 & 0.897 & 0.937 & 0.913 & 0.882 \\
+\midrule
+Coverage & Retained anchor & -- & 0.914 & 0.640 & 0.876 & 0.849 & 0.922 & 0.863 & 0.844 \\
+ & Uniform centroid & -- & 0.930 & 0.713 & 0.924 & 0.890 & 0.931 & 0.893 & 0.880 \\
+ & Response centroid & -- & 0.919 & 0.671 & 0.890 & 0.876 & 0.922 & 0.891 & 0.862 \\
+ & Learned (score-recon) & score-recon & 0.930 & 0.704 & 0.930 & 0.895 & 0.933 & 0.917 & 0.885 \\
+ & Learned (margin) & margin & 0.932 & 0.703 & 0.926 & 0.892 & 0.931 & 0.918 & 0.884 \\
+ & Learned (full) & full & 0.932 & 0.704 & 0.926 & 0.891 & 0.930 & 0.916 & 0.883 \\
+\bottomrule
+\end{tabular}

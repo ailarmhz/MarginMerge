@@ -1,0 +1,10 @@
+cff-version: 1.2.0
+message: "If you use this code, please cite the paper."
+title: "Coverage Matters: MarginMerge for Compressing Multi-Vector Visual Document Retrievers"
+authors:
+  - name: "Anonymous submission"
+preferred-citation:
+  type: conference-paper
+  title: "Coverage Matters: MarginMerge for Compressing Multi-Vector Visual Document Retrievers"
+  year: 2027
+  collection-title: "Proceedings of the AAAI Conference on Artificial Intelligence (AAAI)"
