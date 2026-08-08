@@ -2,17 +2,7 @@
 
 Code for "Coverage Matters: MarginMerge for Compressing Multi-Vector Visual Document Retrievers".
 
-ColPali and ColQwen keep one vector per image patch, so a single page costs hundreds
-to thousands of vectors. MarginMerge replaces them with k = ceil(rho * n) synthetic
-vectors, computed once when the document is indexed. Retrieval is still plain MaxSim,
-just over fewer vectors. On six datasets it keeps 97-99% of full-index nDCG@5 at
-rho = 0.05 and 0.10.
-
 ![method](assets/method.png)
-
-Per document we pick k anchors covering different query directions, assign each patch
-to its nearest anchor, and collapse every cluster into one vector with a small shared
-MLP. The MLP is trained to reproduce the positive/negative margins of the full index.
 
 ## Setup
 
