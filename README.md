@@ -15,7 +15,7 @@ The two backbones need different transformers versions, so use two envs.
     pip install -r requirements-colpali.txt
 
 The pins are not optional. transformers >= 4.49 re-initialises the PaliGemma weights
-in ColPali-v1.3 without warning, which gives you garbage embeddings. Run
+in ColPali-v1.3 without warning. Run
 `python src/verify_colpali.py` before using any ColPali cache.
 
 Imports in `src/` are flat, so run things with `export PYTHONPATH=$PWD/src`.
