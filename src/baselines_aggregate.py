@@ -46,7 +46,7 @@ def emit():
     ax[0].set_xscale('log')
     ax[0].set_xlabel('index memory (% of full, log)')
     ax[0].set_ylabel('nDCG@5')
-    ax[0].set_title('Rendered-average (5 slices) — memory vs quality\nerror bars = std across slices')
+    ax[0].set_title('rendered-average (5 slices): memory vs quality\nerror bars = std across slices')
     ax[0].grid(True, alpha=0.3)
     ax[0].legend(fontsize=7.5)
     for meth in METHODS:
@@ -58,7 +58,7 @@ def emit():
     ax[1].set_xscale('log')
     ax[1].set_xlabel('index memory (% of full, log)')
     ax[1].set_ylabel('nDCG@5')
-    ax[1].set_title('flickr (natural) — separate panel')
+    ax[1].set_title('flickr (natural), separate panel')
     ax[1].grid(True, alpha=0.3)
     ax[1].legend(fontsize=7.5)
     plt.tight_layout()
@@ -67,8 +67,6 @@ def emit():
 
     def block(agg_d, title):
         L = [f'\n### {title} (nDCG@5, mean±std across slices)', '| method | 20% | 10% | 5% |', '|---|---|---|---|']
-        for rho in [0.2, 0.1, 0.05]:
-            pass
         for meth in METHODS:
             cells = []
             for rho in [0.2, 0.1, 0.05]:
@@ -76,7 +74,7 @@ def emit():
                     mn, sd = agg_d[meth][rho]
                     cells.append(f'{mn:.3f}±{sd:.3f}')
                 else:
-                    cells.append('—')
+                    cells.append('-')
             L.append(f'| {LABEL[meth]} | {cells[0]} | {cells[1]} | {cells[2]} |')
         for rho, nm in [(0.2, '20%'), (0.1, '10%'), (0.05, '5%')]:
             ms = [(agg_d[m][rho][0], m) for m in METHODS if m != 'full' and rho in agg_d.get(m, {})]
@@ -86,14 +84,14 @@ def emit():
             best = ms[0]
             second = ms[1] if len(ms) > 1 else (0, None)
             tie = abs(best[0] - second[0]) <= agg_d[best[1]][rho][1] + agg_d[second[1]][rho][1] if second[1] else False
-            L.append(f"*best @{nm}: {LABEL[best[1]]} ({best[0]:.3f}){(' — TIE with ' + LABEL[second[1]] if tie else '')}*")
+            L.append(f"*best @{nm}: {LABEL[best[1]]} ({best[0]:.3f}){(', tie with ' + LABEL[second[1]] if tie else '')}*")
         return '\n'.join(L)
-    md = ['# Memory–quality comparison table (in-harness, frozen ColQwen2.5, held-out docs+queries, 3 seeds)']
-    md.append(block(rend, 'Rendered-average — ALL 5 slices'))
-    md.append(block(rend_nodoc, 'Rendered-average — EXCLUDING docvqa (footnoted-anomalous)'))
+    md = ['# Memory vs quality (frozen ColQwen2.5, held-out docs+queries, 3 seeds)']
+    md.append(block(rend, 'Rendered-average, all 5 slices'))
+    md.append(block(rend_nodoc, 'Rendered-average, excluding docvqa'))
     if flk:
         md.append(block(flk, 'flickr (natural)'))
-    md.append('\n### Byte-reduction (ORTHOGONAL AXIS — cuts bytes not count; not a count-reduction competitor)')
+    md.append('\n### Byte-reduction (cuts bytes, not vector count)')
     md.append('| method | memory (bytes %) | rendered-avg nDCG@5 |')
     md.append('|---|---|---|')
     for key, lbl in [('int8_full', 'int8 quant, full count'), ('int8_kcenter0.2', 'int8 quant + k-center@20%')]:
@@ -133,7 +131,7 @@ def emit():
         d = np.sqrt((ra ** 2).sum() * (rb ** 2).sum())
         return float((ra * rb).sum() / d) if d > 0 else 0.0
     rho_hc = spearman(HC, RET)
-    cov_rows.append(f'\n**Spearman(HC coverage, retention) across {len(HC)} (method×mem) points = {rho_hc:.3f}** — coverage of the argmax-union predicts retention across methods. No prior method measures this.')
+    cov_rows.append(f'\nSpearman(HC coverage, retention) over {len(HC)} (method, mem) points = {rho_hc:.3f}')
     open(f'{RES}/coverage_table.md', 'w').write('\n'.join(cov_rows) + '\n')
     print(f'saved coverage_table.md  (Spearman HC-retention = {rho_hc:.3f})')
     return (rend, rend_nodoc, flk, rho_hc)

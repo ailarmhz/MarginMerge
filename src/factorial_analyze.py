@@ -179,7 +179,7 @@ def main():
     g_fixed = cov_minus_rand('response_centroid', 'none')
     g_learn = cov_minus_rand('learned', 'margin')
     inter = g_learn - g_fixed if g_fixed is not None and g_learn is not None else None
-    lines += ['\n## 2. Interaction (coverage−random gain: amplified by learning?)\n', f'- coverage−random under **fixed** response centroid: {g_fixed:+.4f}', f'- coverage−random under **learned** synthesis (margin): {g_learn:+.4f}', f'- **interaction** (learned − fixed): {inter:+.4f}']
+    lines += ['\n## 2. Interaction (is the coverage-random gain amplified by learning?)\n', f'- coverage-random under fixed response centroid: {g_fixed:+.4f}', f'- coverage-random under learned synthesis (margin): {g_learn:+.4f}', f'- interaction (learned minus fixed): {inter:+.4f}']
     lines += ['\n## 3. Loss ladder (learned synthesis), mean nDCG@5 over anchors & datasets\n', '| Loss | mean nDCG@5 |', '|---|---|']
     loss_means = {}
     for loss in ['score_reconstruction', 'margin', 'full']:
@@ -194,7 +194,7 @@ def main():
     learn_ind = float(np.mean([v for v in anchor_gain.values() if v is not None])) if anchor_gain else None
     q4 = loss_means.get('margin') - loss_means.get('score_reconstruction') if loss_means.get('margin') is not None and loss_means.get('score_reconstruction') is not None else None
     interp = 'primarily interaction' if inter is not None and abs(inter) >= SIG and (g_fixed is None or abs(g_fixed) < SIG) else 'both independent and interaction' if inter is not None and abs(inter) >= SIG else 'mostly independent effects'
-    lines += ['\n## 4. Conclusions\n', f'- **Coverage-aware anchors independently useful?** {verdict(g_fixed)} (coverage−random under fixed synthesis = {g_fixed:+.4f}).', f'- **Learned synthesis independently useful?** {verdict(learn_ind)} (mean learned−fixed over anchors = {learn_ind:+.4f}).', f'- **Gain primarily from interaction?** interaction={inter:+.4f} → {interp}.', f'- **Margin > absolute score reconstruction?** {verdict(q4)} (margin−score_reconstruction = {q4:+.4f}).']
+    lines += ['\n## 4. Summary\n', f'- coverage anchors help on their own: {verdict(g_fixed)} (coverage-random under fixed synthesis = {g_fixed:+.4f})', f'- learned synthesis helps on its own: {verdict(learn_ind)} (mean learned-fixed over anchors = {learn_ind:+.4f})', f'- interaction = {inter:+.4f}, i.e. {interp}', f'- margin beats score reconstruction: {verdict(q4)} (margin-score_reconstruction = {q4:+.4f})']
     open(f'{OUT}/report.md', 'w').write('\n'.join(lines) + '\n')
     print('[analyze] report.md + LaTeX table written\n')
     print('\n'.join(lines))

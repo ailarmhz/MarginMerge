@@ -19,11 +19,11 @@ Backbone: frozen ColQwen2.5. Metric: nDCG@5, held-out Table-9 protocol. Bootstra
 | kcenter | 0.8136 | 0.8706 | +0.0569 |
 | coverage | 0.8303 | 0.8667 | +0.0365 |
 
-## 2. Interaction (coverage−random gain: amplified by learning?)
+## 2. Interaction (is the coverage-random gain amplified by learning?)
 
-- coverage−random under **fixed** response centroid: +0.0388
-- coverage−random under **learned** synthesis (margin): +0.0002
-- **interaction** (learned − fixed): -0.0387
+- coverage-random under fixed response centroid: +0.0388
+- coverage-random under learned synthesis (margin): +0.0002
+- interaction (learned minus fixed): -0.0387
 
 ## 3. Loss ladder (learned synthesis), mean nDCG@5 over anchors & datasets
 
@@ -33,9 +33,9 @@ Backbone: frozen ColQwen2.5. Metric: nDCG@5, held-out Table-9 protocol. Bootstra
 | margin | 0.8679 |
 | full | 0.8682 |
 
-## 4. Conclusions
+## 4. Summary
 
-- **Coverage-aware anchors independently useful?** yes (coverage−random under fixed synthesis = +0.0388).
-- **Learned synthesis independently useful?** yes (mean learned−fixed over anchors = +0.0562).
-- **Gain primarily from interaction?** interaction=-0.0387 → both independent and interaction.
-- **Margin > absolute score reconstruction?** no (below 0.005) (margin−score_reconstruction = -0.0009).
+- coverage anchors help on their own: yes (coverage-random under fixed synthesis = +0.0388)
+- learned synthesis helps on its own: yes (mean learned-fixed over anchors = +0.0562)
+- interaction = -0.0387, i.e. both independent and interaction
+- margin beats score reconstruction: no (below 0.005) (margin-score_reconstruction = -0.0009)

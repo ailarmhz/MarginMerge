@@ -1,79 +1,87 @@
-# MarginMerge: Coverage-Aware Compression of Multi-Vector Visual Document Retrievers
+# MarginMerge
 
-Official code for **“Coverage Matters: MarginMerge for Compressing Multi-Vector Visual Document Retrievers.”**
+Code for "Coverage Matters: MarginMerge for Compressing Multi-Vector Visual Document Retrievers".
 
-Multi-vector visual retrievers (ColPali, ColQwen) store hundreds–thousands of patch vectors per page. MarginMerge compresses each document **once at indexing time** into `k = ⌈ρn⌉` synthetic representatives, leaving the standard MaxSim retrieval interface unchanged. Across six datasets on ColQwen2.5 and ColPali it preserves 97–99% of full-index nDCG@5 at 5–10% retention.
+ColPali and ColQwen keep one vector per image patch, so a single page costs hundreds
+to thousands of vectors. MarginMerge replaces them with k = ceil(rho * n) synthetic
+vectors, computed once when the document is indexed. Retrieval is still plain MaxSim,
+just over fewer vectors. On six datasets it keeps 97-99% of full-index nDCG@5 at
+rho = 0.05 and 0.10.
 
-![MarginMerge method overview](assets/method.png)
+![method](assets/method.png)
 
-Offline, per document: (1) select **coverage-aware anchors** that span complementary query-relevant directions, (2) assign each patch to its nearest anchor, (3) synthesize one representative per cluster with a tiny shared MLP, (4) train that MLP by **ranking-margin distillation** against the frozen full index. Online retrieval is untouched — standard MaxSim over `k` vectors.
+Per document we pick k anchors covering different query directions, assign each patch
+to its nearest anchor, and collapse every cluster into one vector with a small shared
+MLP. The MLP is trained to reproduce the positive/negative margins of the full index.
 
-## Install
+## Setup
 
-Two environments, because the two backbones need different `transformers`:
+The two backbones need different transformers versions, so use two envs.
 
-```bash
-python -m venv .venv && . .venv/bin/activate
-pip install -r requirements.txt              # core + ColQwen2.5 encoding (transformers 4.47.1)
+    python -m venv .venv && . .venv/bin/activate
+    pip install -r requirements.txt
 
-python -m venv .venv-colpali && . .venv-colpali/bin/activate
-pip install -r requirements-colpali.txt      # ColPali-v1.3 (colpali-engine 0.3.5 → transformers 4.46.3)
-```
+    python -m venv .venv-colpali && . .venv-colpali/bin/activate
+    pip install -r requirements-colpali.txt
 
-Pins matter: `transformers ≥ 4.49` silently re-initialises ColPali-v1.3's PaliGemma weights. Run `python src/verify_colpali.py` before trusting any ColPali embedding — it asserts no re-init warning and retrieval sanity ≥ 8/10.
+The pins are not optional. transformers >= 4.49 re-initialises the PaliGemma weights
+in ColPali-v1.3 without warning, which gives you garbage embeddings. Run
+`python src/verify_colpali.py` before using any ColPali cache.
 
-`src/` uses flat imports, so set `export PYTHONPATH=$PWD/src` once. Quick check, no data needed:
+Imports in `src/` are flat, so run things with `export PYTHONPATH=$PWD/src`.
+`tests/` needs no data:
 
-```bash
-PYTHONPATH=src python tests/test_marginmerge.py   # also test_gapcover.py, test_factorial.py
-```
+    PYTHONPATH=src python tests/test_marginmerge.py
+    PYTHONPATH=src python tests/test_gapcover.py
+    PYTHONPATH=src python tests/test_factorial.py
 
-## Reproduce
+## Running it
 
-```bash
-# 1. frozen embedding caches
-python src/encode.py arxivqa docvqa infovqa flickr
-python src/encode_slices.py tatdqa tabfquad
-python src/encode_colpali.py arxivqa docvqa infovqa flickr tatdqa tabfquad   # colpali env
+Encode the corpora (datasets come from the ViDoRe and HF hubs):
 
-# 2. prototype bank (training queries only, leakage-checked)
-python src/build_query_prototypes.py --seed 42 --out outputs/bank_seed42.pt
+    python src/encode.py arxivqa docvqa infovqa flickr
+    python src/encode_slices.py tatdqa tabfquad
+    python src/encode_colpali.py arxivqa docvqa infovqa flickr tatdqa tabfquad
 
-# 3. train
-python src/train_marginmerge.py --bank outputs/bank_seed42.pt --seed 42 \
-  --out outputs/marginmerge_seed42.pt
+Build the prototype bank from training queries only:
 
-# 4. main tables (repeat with MM_RHO=0.10 / 0.20)
-MM_RHO=0.05 python src/eval_marginmerge.py --bank outputs/bank_seed42.pt \
-  --ckpt outputs/marginmerge_seed42.pt --table9 \
-  --slices arxivqa docvqa infovqa tatdqa tabfquad flickr
+    python src/build_query_prototypes.py --seed 42 --out outputs/bank_seed42.pt
 
-# 5. selection baselines (random / k-center / importance / top-likelihood / ToMe / int8)
-python src/baselines_memory.py arxivqa docvqa infovqa tatdqa tabfquad flickr
-python src/baselines_aggregate.py
+Train:
 
-# 6. anchor × synthesis × loss factorial
-python src/factorial_run.py --phase B
-python src/factorial_analyze.py --phase B
-```
+    python src/train_marginmerge.py --bank outputs/bank_seed42.pt --seed 42 \
+      --out outputs/marginmerge_seed42.pt
 
-Datasets are pulled from the ViDoRe / HF hubs. `factorial_run.py` is idempotent, so interrupted runs resume.
+Evaluate (set MM_RHO to 0.05, 0.10 or 0.20):
 
-Environment knobs: `CATTS_CACHE` (`data/cache_colqwen`), `BANK` (`outputs/bank_seed42.pt`), `FACT_OUT`, `CATTS_MM_OUT`, `MM_RHO` (`0.05`), `HF_HOME`. Switch backbone with `CATTS_CACHE=data/cache_colpali BANK=outputs/bank_colpali_seed42.pt`.
+    MM_RHO=0.05 python src/eval_marginmerge.py --bank outputs/bank_seed42.pt \
+      --ckpt outputs/marginmerge_seed42.pt --table9 \
+      --slices arxivqa docvqa infovqa tatdqa tabfquad flickr
 
-## Code map
+Selection baselines, and the anchor/synthesis/loss factorial:
 
-| Paper | Eq. | Code |
-|---|---|---|
-| Coverage + submodular anchor selection | 4–5 | `gapcover.py` |
-| Nearest-anchor assignment | 6 | `clustering.py` |
-| Representative synthesis (weights, MLP) | 7–9 | `marginmerge.py` |
-| Margin-distillation loss + hard negatives | 10–12 | `train_marginmerge.py` |
+    python src/baselines_memory.py arxivqa docvqa infovqa tatdqa tabfquad flickr
+    python src/baselines_aggregate.py
+    python src/factorial_run.py --phase B
+    python src/factorial_analyze.py --phase B
 
-## Results
+`factorial_run.py` skips work it has already done, so you can restart it.
 
-`results/` holds the aggregated numbers from our runs: `TABLE1_colpali_final.{md,csv}` for the ColPali compression landscape, and `factorial_summary_mean_std.csv`, `factorial_bootstrap_ci.csv`, `factorial_pairwise_deltas.csv`, `factorial_anchor_overlap_diagnostics.csv`, `report.md`, `table_factorial_rho{5,10}.tex` for the factorial. Raw per-run dumps and `.pt` checkpoints are not committed.
+Settings come from env vars: CATTS_CACHE (data/cache_colqwen), BANK
+(outputs/bank_seed42.pt), FACT_OUT, CATTS_MM_OUT, MM_RHO (0.05), HF_HOME. To use the
+ColPali backbone instead, point CATTS_CACHE at data/cache_colpali and BANK at the
+matching bank.
+
+## Where things are
+
+- `gapcover.py` - coverage and anchor selection (Eq. 4-5)
+- `clustering.py` - patch to anchor assignment (Eq. 6)
+- `marginmerge.py` - representative synthesis (Eq. 7-9)
+- `train_marginmerge.py` - hard negatives and the margin loss (Eq. 10-12)
+
+`results/` has the aggregated numbers we report. Checkpoints and per-run dumps are not
+in the repo.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT, see [LICENSE](LICENSE).
