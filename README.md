@@ -57,10 +57,6 @@ Selection baselines, and the anchor/synthesis/loss factorial:
 
 `factorial_run.py` skips work it has already done, so you can restart it.
 
-Settings come from env vars: CATTS_CACHE (data/cache_colqwen), BANK
-(outputs/bank_seed42.pt), FACT_OUT, CATTS_MM_OUT, MM_RHO (0.05), HF_HOME. To use the
-ColPali backbone instead, point CATTS_CACHE at data/cache_colpali and BANK at the
-matching bank.
 
 ## Where things are
 
